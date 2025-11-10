@@ -66,19 +66,19 @@ Pysra/
 - **Purpose**: Facial emotion recognition training
 - **Format**: CSV with pixel values and emotion labels
 - **Emotions**: Angry, Disgust, Fear, Happy, Sad, Surprise, Neutral
-*- Can be downloaded in Kaggle*
+- Download: https://www.kaggle.com/datasets/genadieva/fer-2013-csv-dataset
 
 ### 2. Emotion Dataset (`emotion.csv`)
 - **Purpose**: Audio emotion recognition training
 - **Format**: CSV with audio features and emotion labels
 - **Features**: MFCC, spectral features, prosodic features
-*- Can be downloaded in Kaggle*
-
+- Download: https://www.kaggle.com/datasets/mostafaabdlhamed/speech-signal-features
+  
 ### 3. Text Dataset (`text.csv`)
 - **Purpose**: Text emotion analysis training
 - **Format**: CSV with text samples and emotion labels
 - **Content**: Social media posts, reviews, comments
-*- Can be downloaded in Kaggle*
+- Download: https://www.kaggle.com/datasets/adhamelkomy/twitter-emotion-dataset
 
 ## Installation
 
