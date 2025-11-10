@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="hero" style="padding: 2rem;">
+    <h1>Your Emotion Dashboard</h1>
+    <p>Track your emotional journey over time</p>
+</div>
+
+<div class="dashboard-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Analyses</div>
+        <div class="stat-value" id="total-logs">{{ logs|length }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Most Common</div>
+        <div class="stat-value" id="most-common">-</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Avg Confidence</div>
+        <div class="stat-value" id="avg-confidence">-</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Trend</div>
+        <div class="stat-value" id="trend">📊</div>
+    </div>
+</div>
+
+<div class="chart-container">
+    <h2>Emotion Distribution</h2>
+    <canvas id="emotion-chart"></canvas>
+</div>
+
+<div class="chart-container">
+    <h2>Emotion Timeline</h2>
+    <canvas id="timeline-chart"></canvas>
+</div>
+
+<div class="chart-container">
+    <h2>Daily Emotion Heatmap</h2>
+    <div id="heatmap-container"></div>
+</div>
+
+<script>
+// Get emotion data
+fetch('/api/emotion-data')
+    .then(response => response.json())
+    .then(data => {
+        updateStatistics(data);
+        createEmotionChart(data);
+        createTimelineChart(data);
+        createHeatmap(data);
+    });
+
+function updateStatistics(data) {
+    // Calculate statistics
+    const emotions = data.emotions;
+    const confidences = data.confidences;
+
+    // Most common emotion
+    const emotionCounts = {};
+    emotions.forEach(emotion => {
+        emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
+    });
+
+    const mostCommon = Object.keys(emotionCounts).reduce((a, b) => 
+        emotionCounts[a] > emotionCounts[b] ? a : b, ''
+    );
+
+    document.getElementById('most-common').textContent = mostCommon || 'N/A';
+
+    // Average confidence
+    const avgConfidence = confidences.length > 0 
+        ? (confidences.reduce((a, b) => a + b, 0) / confidences.length * 100).toFixed(1)
+        : 0;
+    document.getElementById('avg-confidence').textContent = avgConfidence + '%';
+
+    // Trend (simplified)
+    const recentEmotions = emotions.slice(-7);
+    const positiveCount = recentEmotions.filter(e => e === 'Happy' || e === 'Surprise').length;
+    const trend = positiveCount >= 4 ? '📈' : positiveCount >= 2 ? '➡️' : '📉';
+    document.getElementById('trend').textContent = trend;
+}
+
+function createEmotionChart(data) {
+    const ctx = document.getElementById('emotion-chart').getContext('2d');
+
+    const emotionCounts = {};
+    data.emotions.forEach(emotion => {
+        emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
+    });
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(emotionCounts),
+            datasets: [{
+                data: Object.values(emotionCounts),
+                backgroundColor: [
+                    '#fbbf24', '#3b82f6', '#ef4444', 
+                    '#8b5cf6', '#f59e0b', '#6b7280', '#10b981'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 10,
+                    right: 10,
+                    bottom: 10,
+                    left: 10
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 15
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createTimelineChart(data) {
+    const ctx = document.getElementById('timeline-chart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.dates,
+            datasets: [{
+                label: 'Confidence',
+                data: data.confidences.map(c => c * 100),
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    top: 10,
+                    right: 20,
+                    bottom: 25,
+                    left: 10
+                }
+            }
+        }
+    });
+}
+
+function createHeatmap(data) {
+    // Create a simplified heatmap visualization
+    const container = document.getElementById('heatmap-container');
+    container.innerHTML = '<p style="text-align: center; color: #6b7280;">Emotion activity over the past days</p>';
+
+    const dateCounts = {};
+    data.dates.forEach(date => {
+        dateCounts[date] = (dateCounts[date] || 0) + 1;
+    });
+
+    const heatmapHTML = Object.entries(dateCounts).map(([date, count]) => {
+        const intensity = Math.min(count / 5, 1);
+        const color = `rgba(99, 102, 241, ${intensity})`;
+        return `<div class="heatmap-cell" style="background-color: ${color};" title="${date}: ${count} entries"></div>`;
+    }).join('');
+
+    container.innerHTML += `<div class="heatmap-container">${heatmapHTML}</div>`;
+}
+</script>
+{% endblock %}

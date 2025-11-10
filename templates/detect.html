@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero" style="padding: 2rem;">
+    <h1>Emotion Detection</h1>
+    <p>Choose your preferred method to analyze emotions</p>
+</div>
+
+<div class="detection-modes">
+    <!-- Face Detection -->
+    <div class="detection-card">
+        <div class="icon emotion-icon">😊</div>
+        <h3>Face Detection</h3>
+        <form id="face-form" enctype="multipart/form-data">
+            <input type="hidden" name="detection_type" value="face">
+            <div class="file-upload-wrapper">
+                <input type="file" id="face-file" name="face_file" accept="image/*" required>
+                <label for="face-file" class="file-upload-label">
+                    <div class="file-upload-icon">📷</div>
+                    <div>Click to upload image</div>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Analyze Face</button>
+        </form>
+    </div>
+
+    <!-- Text Detection -->
+    <div class="detection-card">
+        <div class="icon emotion-icon">✍️</div>
+        <h3>Text Analysis</h3>
+        <form id="text-form">
+            <input type="hidden" name="detection_type" value="text">
+            <textarea class="form-control" name="text_input" rows="5" placeholder="Enter your text here..." required style="margin-bottom: 1rem;"></textarea>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Analyze Text</button>
+        </form>
+    </div>
+
+    <!-- Audio Detection -->
+    <div class="detection-card">
+        <div class="icon emotion-icon">🎤</div>
+        <h3>Voice Analysis</h3>
+        <form id="audio-form" enctype="multipart/form-data">
+            <input type="hidden" name="detection_type" value="audio">
+            <div class="file-upload-wrapper">
+                <input type="file" id="audio-file" name="audio_file" accept="audio/*" required>
+                <label for="audio-file" class="file-upload-label">
+                    <div class="file-upload-icon">🎵</div>
+                    <div>Click to upload audio</div>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Analyze Voice</button>
+        </form>
+    </div>
+</div>
+
+<!-- Results Container -->
+<div id="result-area" style="display: none;">
+    <div class="result-container">
+        <h2>Analysis Result</h2>
+        <div class="emotion-icon" id="result-icon">🎭</div>
+        <div class="emotion-result" id="emotion-text">-</div>
+        <div class="confidence-bar">
+            <div class="confidence-fill" id="confidence-bar" style="width: 0%;">
+                <span id="confidence-text">0%</span>
+            </div>
+        </div>
+        <div style="margin-top: 2rem; font-size: 1.2rem;" id="motivation-message"></div>
+    </div>
+</div>
+
+<!-- Loading Indicator -->
+<div id="loading" style="display: none; text-align: center; margin: 2rem 0;">
+    <div class="loading"></div>
+    <p style="color: white; margin-top: 1rem;">Analyzing emotion...</p>
+</div>
+
+<script>
+const emotionIcons = {
+    'Happy': '😊',
+    'Sad': '😢',
+    'Angry': '😠',
+    'Fear': '😨',
+    'Surprise': '😲',
+    'Neutral': '😐',
+    'Disgust': '🤢'
+};
+
+// Face form submission
+document.getElementById('face-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    await analyzeEmotion(formData);
+});
+
+// Text form submission
+document.getElementById('text-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    await analyzeEmotion(formData);
+});
+
+// Audio form submission
+document.getElementById('audio-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    await analyzeEmotion(formData);
+});
+
+async function analyzeEmotion(formData) {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('result-area').style.display = 'none';
+
+    try {
+        const response = await fetch('/detect', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.emotion) {
+            displayResult(data);
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Error analyzing emotion: ' + error);
+    } finally {
+        document.getElementById('loading').style.display = 'none';
+    }
+}
+
+function displayResult(data) {
+    const resultArea = document.getElementById('result-area');
+    const emotionText = document.getElementById('emotion-text');
+    const resultIcon = document.getElementById('result-icon');
+    const confidenceBar = document.getElementById('confidence-bar');
+    const confidenceText = document.getElementById('confidence-text');
+    const motivationMessage = document.getElementById('motivation-message');
+
+    const confidencePercent = Math.round(data.confidence * 100);
+
+    emotionText.textContent = data.emotion;
+    resultIcon.textContent = emotionIcons[data.emotion] || '🎭';
+    confidenceBar.style.width = confidencePercent + '%';
+    confidenceText.textContent = confidencePercent + '%';
+    motivationMessage.textContent = data.motivation;
+
+    resultArea.style.display = 'block';
+    resultArea.scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero">
+    <h1>Welcome to Pysra</h1>
+    <p>Your Personal Multimodal Emotion Recognition System</p>
+    <p>🎭 Analyze emotions through Face, Text, and Voice</p>
+    <div style="margin-top: 2rem;">
+        <a href="{{ url_for('register') }}" class="btn btn-primary" style="margin: 0 1rem;">Get Started</a>
+        <a href="{{ url_for('login') }}" class="btn btn-success" style="margin: 0 1rem;">Login</a>
+    </div>
+</div>
+
+<div class="detection-modes">
+    <div class="detection-card">
+        <div class="icon">😊</div>
+        <h2>Facial Recognition</h2>
+        <p>Upload your photo and let AI analyze your facial expressions to detect emotions accurately.</p>
+    </div>
+    <div class="detection-card">
+        <div class="icon">✍️</div>
+        <h2>Text Analysis</h2>
+        <p>Share your thoughts in text and discover the emotional sentiment behind your words.</p>
+    </div>
+    <div class="detection-card">
+        <div class="icon">🎤</div>
+        <h2>Voice Analysis</h2>
+        <p>Upload audio recordings and analyze the emotional tone in your voice patterns.</p>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 3rem; text-align: center;">
+    <h2>Why Choose Pysra?</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+        <div>
+            <div style="font-size: 3rem;">📊</div>
+            <h3>Track Progress</h3>
+            <p>Monitor your emotional journey with beautiful dashboards and heatmaps</p>
+        </div>
+        <div>
+            <div style="font-size: 3rem;">🎮</div>
+            <h3>Boost Mood</h3>
+            <p>Play engaging games designed to improve your emotional well-being</p>
+        </div>
+        <div>
+            <div style="font-size: 3rem;">💪</div>
+            <h3>AI Motivation</h3>
+            <p>Receive personalized motivational messages based on your emotions</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

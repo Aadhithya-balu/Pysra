@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero" style="padding: 2rem;">
+    <h1>Emotion History</h1>
+    <p>View your complete emotion analysis history</p>
+</div>
+
+<div class="card">
+    <h2>Recent Analyses</h2>
+    {% if logs %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f3f4f6; text-align: left;">
+                    <th style="padding: 1rem;">Date & Time</th>
+                    <th style="padding: 1rem;">Emotion</th>
+                    <th style="padding: 1rem;">Confidence</th>
+                    <th style="padding: 1rem;">Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 1rem;">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td style="padding: 1rem;">
+                        <span class="emotion-badge" style="background: #f3f4f6;">
+                            {{ log.emotion }}
+                        </span>
+                    </td>
+                    <td style="padding: 1rem;">{{ (log.confidence * 100)|round(2) }}%</td>
+                    <td style="padding: 1rem;">
+                        <span style="padding: 0.25rem 0.75rem; background: #dbeafe; color: #1e40af; border-radius: 12px; font-size: 0.9rem;">
+                            {{ log.detection_type }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align: center; color: #6b7280; padding: 2rem;">No emotion logs yet. Start by analyzing your emotions!</p>
+    {% endif %}
+</div>
+{% endblock %}
